@@ -1,20 +1,27 @@
 
 {
   "name": "react-native-simple-player",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "react-native"
+    "react-native",
+    "react-component",
+    "react-native-component",
+    "react",
+    "mobile",
+    "android",
+    "audio",
+    "player",
   ],
-  "author": "",
-  "license": "",
+  "author": "Róbert Ďuriančík",
+  "license": "MIT",
+  "homepage": "https://github.com/rduriancik/react-native-simple-player",
   "peerDependencies": {
-    "react-native": "^0.41.2",
-    "react-native-windows": "0.41.0-rc.1"
+    "react-native": "^0.54.0",
 
   }
 }
