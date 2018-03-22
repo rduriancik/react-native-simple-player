@@ -1,6 +1,11 @@
 
-import { NativeModules } from 'react-native';
+// import { NativeModules } from 'react-native';
 
-const { RNSimplePlayer } = NativeModules;
+// const { RNSimplePlayer } = NativeModules;
 
-export default RNSimplePlayer;
+// export default RNSimplePlayer;
+
+import PlayButton from './lib/elements/PlayButton'
+module.exports = {
+  PlayButton,
+}
