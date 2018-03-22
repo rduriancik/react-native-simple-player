@@ -1,27 +1,33 @@
-
 {
   "name": "react-native-simple-player",
   "version": "0.1.0",
-  "description": "",
+  "description": "Simple player for audio files",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rduriancik/react-native-simple-player.git"
   },
   "keywords": [
-    "react-native",
-    "react-component",
-    "react-native-component",
     "react",
+    "react-native",
+    "player",
     "mobile",
     "android",
     "audio",
-    "player",
+    "audio-player"
   ],
-  "author": "Róbert Ďuriančík",
+  "author": "Robert Duriancik",
   "license": "MIT",
-  "homepage": "https://github.com/rduriancik/react-native-simple-player",
+  "bugs": {
+    "url": "https://github.com/rduriancik/react-native-simple-player/issues"
+  },
+  "homepage": "https://github.com/rduriancik/react-native-simple-player#readme",
   "peerDependencies": {
-    "react-native": "^0.54.0",
-
+    "react-native": "^0.54.2",
+    "react": "^16.2.0"    
+  },
+  "dependencies": {
+    "prop-types": "^15.6.1",
+    "react-native-vector-icons": "^4.5.0"
   }
 }
