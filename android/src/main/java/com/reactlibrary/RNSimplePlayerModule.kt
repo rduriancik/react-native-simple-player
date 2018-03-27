@@ -12,7 +12,12 @@ class RNSimplePlayerModule(private val reactContext: ReactApplicationContext) : 
     private var loudMusicDialog: Dialog? = null
 
     @ReactMethod
-    fun showLoudMusicDialog(title: String?, message: String?, buttonText: String?) {
+    fun showLoudMusicDialog() {
+        showLoudMusicDialogWithParameters(null, null, null) // default params not working in react
+    }
+
+    @ReactMethod
+    fun showLoudMusicDialogWithParameters(title: String? = null, message: String? = null, buttonText: String? = null) {
         if (loudMusicDialog == null) {
             loudMusicDialog = AlertDialog.Builder(currentActivity).apply {
                 val inflater = LayoutInflater.from(currentActivity)
