@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dialog_loud_music_title">"Loud music alert!"</string>
+    <string name="dialog_loud_music_message">Please, use headphones or place the phone near your ear.</string>
+    <string name="dialog_loud_music_close">Close</string>
+</resources>
