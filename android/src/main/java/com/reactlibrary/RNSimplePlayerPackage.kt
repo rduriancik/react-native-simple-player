@@ -6,10 +6,11 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.uimanager.ViewManager
 
 class RNSimplePlayerPackage : ReactPackage {
-
     override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
         return mutableListOf<NativeModule>(
-                RNSimplePlayerModule(reactContext)
+                RNSimplePlayerModule(reactContext),
+                RNSimplePlayerEventsModule(reactContext),
+                RNSimplePlayerUtilsModule(reactContext)
         )
     }
 
