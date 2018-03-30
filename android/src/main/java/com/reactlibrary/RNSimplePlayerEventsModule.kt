@@ -24,6 +24,8 @@ class RNSimplePlayerEventsModule(private val reactContext: ReactApplicationConte
         private const val IS_UNPLUGGED = "IS_UNPLUGGED"
         private const val IS_NEAR_EAR = "IS_NEAR_EAR"
         private const val IS_NOT_NEAR_EAR = "IS_NOT_NEAR_EAR"
+
+        private const val TAG = "RNSimplePlayerEvents"
     }
 
     private val sensorManager = reactContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager

@@ -3,6 +3,7 @@ package com.reactlibrary
 import android.app.AlertDialog
 import android.app.Dialog
 import android.view.LayoutInflater
+import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
@@ -11,6 +12,8 @@ class RNSimplePlayerUtilsModule(private val reactContext: ReactApplicationContex
     private var loudMusicDialog: Dialog? = null
 
     override fun getName() = "RNSimplePlayerUtils"
+
+    val TAG = "RNSimplePLayerUtils"
 
     @ReactMethod
     fun showLoudMusicDialog() {
@@ -40,5 +43,10 @@ class RNSimplePlayerUtilsModule(private val reactContext: ReactApplicationContex
     @ReactMethod
     fun hideLoudMusicDialog() {
         loudMusicDialog?.dismiss()
+    }
+
+    @ReactMethod
+    fun isLoudMusicDialogShown(promise: Promise) {
+        promise.resolve(loudMusicDialog?.isShowing)
     }
 }
