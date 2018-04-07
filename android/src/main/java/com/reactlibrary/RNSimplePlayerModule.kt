@@ -1,12 +1,17 @@
 package com.reactlibrary
 
-import com.facebook.react.bridge.Promise
-import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.bridge.ReactContextBaseJavaModule
-import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.bridge.*
+import com.facebook.react.modules.core.DeviceEventManagerModule
 
 class RNSimplePlayerModule(private val reactContext: ReactApplicationContext)
     : ReactContextBaseJavaModule(reactContext), PlaybackListener {
+
+    companion object {
+        private const val ON_STATE_CHANGED = "ON_STATE_CHANGED"
+        private const val ON_POSITION_CHANGED = "ON_POSITION_CHANGED"
+        private const val ON_DURATION_CHANGED = "ON_DURATION_CHANGED"
+        private const val ON_PLAYBACK_COMPLETED = "ON_PLAYBACK_COMPLETED"
+    }
 
     private val mPlayerController: PlayerController =
             MediaPlayerHolder(reactContext).apply { setPlaybackListener(this@RNSimplePlayerModule) }
@@ -47,19 +52,47 @@ class RNSimplePlayerModule(private val reactContext: ReactApplicationContext)
     }
 
     override fun onStateChanged(state: Long) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val data = Arguments.createMap().apply {
+            putInt("state", state.toInt())
+        }
+        sendEvent(ON_STATE_CHANGED, data)
     }
 
     override fun onPositionChanged(position: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val data = Arguments.createMap().apply {
+            putInt("position", position)
+        }
+        sendEvent(ON_POSITION_CHANGED, data)
     }
 
     override fun onDurationChanged(duration: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val data = Arguments.createMap().apply {
+            putInt("duration", duration)
+        }
+        sendEvent(ON_DURATION_CHANGED, data)
     }
 
     override fun onPlaybackCompleted() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        sendEvent(ON_PLAYBACK_COMPLETED)
+    }
+
+    private fun sendEvent(eventName: String, data: WritableMap = Arguments.createMap()) {
+        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+                .emit(eventName, data)
+    }
+
+    override fun getConstants(): MutableMap<String, Any> {
+        return mutableMapOf(
+                stateToString(PlaybackListener.States.INVALID) to PlaybackListener.States.INVALID,
+                stateToString(PlaybackListener.States.PLAYING) to PlaybackListener.States.PLAYING,
+                stateToString(PlaybackListener.States.PAUSED) to PlaybackListener.States.PAUSED,
+                stateToString(PlaybackListener.States.RESET) to PlaybackListener.States.RESET,
+                stateToString(PlaybackListener.States.COMPLETED) to PlaybackListener.States.COMPLETED,
+                ON_STATE_CHANGED to ON_STATE_CHANGED,
+                ON_DURATION_CHANGED to ON_DURATION_CHANGED,
+                ON_POSITION_CHANGED to ON_POSITION_CHANGED,
+                ON_PLAYBACK_COMPLETED to ON_PLAYBACK_COMPLETED
+        )
     }
 
     override fun getName() = "RNSimplePlayer"
