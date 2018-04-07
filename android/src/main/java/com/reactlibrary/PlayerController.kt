@@ -1,7 +1,7 @@
 package com.reactlibrary
 
 interface PlayerController {
-    fun loadMedia(resourceId: Int)
+    fun loadMedia(filePath: String): Boolean
     fun release()
     fun isPlaying(): Boolean
     fun play()

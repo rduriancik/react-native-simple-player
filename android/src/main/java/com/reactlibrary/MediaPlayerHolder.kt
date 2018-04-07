@@ -15,7 +15,7 @@ class MediaPlayerHolder(private val context: Context) : PlayerController {
 
     private var mMediaPlayer: MediaPlayer? = null
     private var mPlaybackListener: PlaybackListener? = null
-    private var mResourceId: Int = 0
+    private var mFilePath: String = ""
     private var mExecutor: ScheduledExecutorService? = null
     private var mPositionUpdateTask: Runnable? = null
 
@@ -33,13 +33,20 @@ class MediaPlayerHolder(private val context: Context) : PlayerController {
         }
     }
 
-    override fun loadMedia(resourceId: Int) {
-        mResourceId = resourceId
-
+    override fun loadMedia(filePath: String): Boolean {
+        mFilePath = filePath
         initMediaPlayer()
 
+        try {
+            mMediaPlayer?.setDataSource(filePath)
+            mMediaPlayer?.prepare()
+        } catch (e: Exception) {
+            Log.e(TAG, "File not found. Path $filePath")
+            return false
+        }
 
         initProgressCallback()
+        return true
     }
 
     override fun release() {
@@ -74,7 +81,7 @@ class MediaPlayerHolder(private val context: Context) : PlayerController {
     override fun reset() {
         mMediaPlayer?.let {
             it.reset()
-            loadMedia(mResourceId)
+            loadMedia(mFilePath)
             mPlaybackListener?.onStateChanged(PlaybackListener.States.RESET)
             stopUpdatingProgressCallback(true)
         }
