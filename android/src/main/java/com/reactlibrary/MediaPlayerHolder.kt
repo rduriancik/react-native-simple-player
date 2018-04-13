@@ -3,6 +3,8 @@ package com.reactlibrary
 import android.content.Context
 import android.media.MediaPlayer
 import android.util.Log
+import java.io.File
+import java.io.FileInputStream
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -36,12 +38,16 @@ class MediaPlayerHolder(private val context: Context) : PlayerController {
     override fun loadMedia(filePath: String): Boolean {
         mFilePath = filePath
         initMediaPlayer()
+        val file = File(filePath)
 
         try {
-            mMediaPlayer?.setDataSource(filePath)
+            FileInputStream(file).use {
+                mMediaPlayer?.setDataSource(it.fd)
+            }
             mMediaPlayer?.prepare()
         } catch (e: Exception) {
             Log.e(TAG, "File not found. Path $filePath")
+            e.printStackTrace()
             return false
         }
 
