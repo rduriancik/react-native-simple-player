@@ -12,6 +12,8 @@ import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.LifecycleEventListener
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
+import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.bridge.Promise
 import com.facebook.react.modules.core.DeviceEventManagerModule
 
 class RNSimplePlayerEventsModule(private val reactContext: ReactApplicationContext)
@@ -28,6 +30,8 @@ class RNSimplePlayerEventsModule(private val reactContext: ReactApplicationConte
         private const val TAG = "RNSimplePlayerEvents"
     }
 
+    private var isHeadsetPluggedIn = false
+    private var isNearEar = false
     private val sensorManager = reactContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
     private val sensorEventListener = object : SensorEventListener {
@@ -36,7 +40,8 @@ class RNSimplePlayerEventsModule(private val reactContext: ReactApplicationConte
 
         override fun onSensorChanged(event: SensorEvent?) {
             event?.let {
-                sendEvent(ON_NEAR_EAR, it.values[0].toInt() < 5)
+                isNearEar = it.values[0].toInt() < 5
+                sendEvent(ON_NEAR_EAR, isNearEar)
             }
         }
     }
@@ -45,10 +50,12 @@ class RNSimplePlayerEventsModule(private val reactContext: ReactApplicationConte
             if (intent?.action == Intent.ACTION_HEADSET_PLUG) {
                 val state = intent.getIntExtra("state", -1)
                 when (state) {
-                    0 -> sendEvent(ON_HEADSET_PLUGGED, false) // Headset is unplugged
-                    1 -> sendEvent(ON_HEADSET_PLUGGED, true) // Headset is plugged in
-                    else -> sendEvent(ON_HEADSET_PLUGGED, false) // unknown state
+                    0 ->  isHeadsetPluggedIn = false// Headset is unplugged
+                    1 -> isHeadsetPluggedIn = true // Headset is plugged in
+                    else -> isHeadsetPluggedIn = false // unknown state
                 }
+
+                sendEvent(ON_HEADSET_PLUGGED, isHeadsetPluggedIn)
             }
         }
     }
@@ -56,6 +63,16 @@ class RNSimplePlayerEventsModule(private val reactContext: ReactApplicationConte
     init {
         reactContext.addLifecycleEventListener(this)
     }
+
+    @ReactMethod
+    fun isNearEar(promise: Promise) {
+        promise.resolve(isNearEar)
+    }
+
+    @ReactMethod
+    fun isHeadsetPluggedIn(promise: Promise) {
+        promise.resolve(isHeadsetPluggedIn)
+    } 
 
     override fun getName() = "RNSimplePlayerEvents"
 
