@@ -2,6 +2,7 @@ package com.reactlibrary
 
 import com.facebook.react.bridge.*
 import com.facebook.react.modules.core.DeviceEventManagerModule
+import java.lang.ref.WeakReference
 
 class RNSimplePlayerModule(private val reactContext: ReactApplicationContext)
     : ReactContextBaseJavaModule(reactContext), PlaybackListener {
@@ -17,8 +18,8 @@ class RNSimplePlayerModule(private val reactContext: ReactApplicationContext)
             MediaPlayerHolder(reactContext).apply { setPlaybackListener(this@RNSimplePlayerModule) }
 
     @ReactMethod
-    fun loadAudioFile(filePath: String, promise: Promise) {
-        promise.resolve(mPlayerController.loadMedia(filePath))
+    fun loadAudioFile(filePath: String, preventLoudMusic: Boolean, promise: Promise) {
+        promise.resolve(mPlayerController.loadMedia(filePath, preventLoudMusic, WeakReference(currentActivity)))
     }
 
     @ReactMethod
