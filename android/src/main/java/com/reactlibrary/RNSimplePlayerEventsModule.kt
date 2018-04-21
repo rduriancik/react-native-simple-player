@@ -8,16 +8,12 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import com.facebook.react.bridge.Arguments
-import com.facebook.react.bridge.LifecycleEventListener
-import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.bridge.ReactContextBaseJavaModule
-import com.facebook.react.bridge.ReactMethod
-import com.facebook.react.bridge.Promise
+import android.util.Log
+import com.facebook.react.bridge.*
 import com.facebook.react.modules.core.DeviceEventManagerModule
 
 class RNSimplePlayerEventsModule(private val reactContext: ReactApplicationContext)
-    : ReactContextBaseJavaModule(reactContext), LifecycleEventListener {
+    : ReactContextBaseJavaModule(reactContext) {
 
     companion object {
         private const val ON_HEADSET_PLUGGED = "ON_HEADSET_PLUGGED"
@@ -33,7 +29,7 @@ class RNSimplePlayerEventsModule(private val reactContext: ReactApplicationConte
     private var isHeadsetPluggedIn = false
     private var isNearEar = false
     private val sensorManager = reactContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-    private val proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
+    private val proximitySensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
     private val sensorEventListener = object : SensorEventListener {
         override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         }
@@ -41,6 +37,7 @@ class RNSimplePlayerEventsModule(private val reactContext: ReactApplicationConte
         override fun onSensorChanged(event: SensorEvent?) {
             event?.let {
                 isNearEar = it.values[0].toInt() < 5
+                Log.d(TAG, "onSensorChangedEvent - is near ear? $isNearEar")
                 sendEvent(ON_NEAR_EAR, isNearEar)
             }
         }
@@ -49,19 +46,27 @@ class RNSimplePlayerEventsModule(private val reactContext: ReactApplicationConte
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == Intent.ACTION_HEADSET_PLUG) {
                 val state = intent.getIntExtra("state", -1)
-                when (state) {
-                    0 ->  isHeadsetPluggedIn = false// Headset is unplugged
-                    1 -> isHeadsetPluggedIn = true // Headset is plugged in
-                    else -> isHeadsetPluggedIn = false // unknown state
+                isHeadsetPluggedIn = when (state) {
+                    0 -> false// Headset is unplugged
+                    1 -> true // Headset is plugged in
+                    else -> false // unknown state
                 }
-
+                Log.d(TAG, "OnHeadsetPlugged - is plugged in? $isHeadsetPluggedIn")
                 sendEvent(ON_HEADSET_PLUGGED, isHeadsetPluggedIn)
             }
         }
     }
 
-    init {
-        reactContext.addLifecycleEventListener(this)
+    @ReactMethod
+    fun startEvents() {
+        reactContext.registerReceiver(onHeadsetPlugged, IntentFilter(Intent.ACTION_HEADSET_PLUG))
+        sensorManager.registerListener(sensorEventListener, proximitySensor, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+    @ReactMethod
+    fun stopEvents() {
+        reactContext.unregisterReceiver(onHeadsetPlugged)
+        sensorManager.unregisterListener(sensorEventListener)
     }
 
     @ReactMethod
@@ -75,19 +80,6 @@ class RNSimplePlayerEventsModule(private val reactContext: ReactApplicationConte
     } 
 
     override fun getName() = "RNSimplePlayerEvents"
-
-    override fun onHostResume() {
-        reactContext.registerReceiver(onHeadsetPlugged, IntentFilter(Intent.ACTION_HEADSET_PLUG))
-        sensorManager.registerListener(sensorEventListener, proximitySensor, SensorManager.SENSOR_DELAY_NORMAL)
-    }
-
-    override fun onHostPause() {
-    }
-
-    override fun onHostDestroy() {
-        reactContext.unregisterReceiver(onHeadsetPlugged)
-        sensorManager.unregisterListener(sensorEventListener)
-    }
 
     private fun sendEvent(eventName: String, state: Boolean) {
         val params = Arguments.createMap().apply {
