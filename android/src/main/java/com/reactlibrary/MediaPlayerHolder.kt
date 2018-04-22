@@ -7,6 +7,7 @@ import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Build
+import android.os.PowerManager
 import android.util.Log
 import java.io.File
 import java.io.FileInputStream
@@ -28,6 +29,11 @@ class MediaPlayerHolder(private val context: Context) : PlayerController {
     private var mActivity: WeakReference<Activity?>? = null
     private var mExecutor: ScheduledExecutorService? = null
     private var mPositionUpdateTask: Runnable? = null
+
+    private val mPartialWakeLock: PowerManager.WakeLock by lazy {
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG).apply { setReferenceCounted(false) }
+    }
 
     private val mAudioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     private var mIsAudioFocused = false
@@ -70,6 +76,7 @@ class MediaPlayerHolder(private val context: Context) : PlayerController {
                 setOnCompletionListener {
                     stopUpdatingProgressCallback(true)
                     releaseAudioFocus()
+                    releasePartialWakeLock()
                     mPlaybackListener?.let {
                         it.onStateChanged(PlaybackListener.States.COMPLETED)
                         it.onPlaybackCompleted()
@@ -78,7 +85,6 @@ class MediaPlayerHolder(private val context: Context) : PlayerController {
 
                 Log.d(TAG, "Prevent loud music? $preventLoudMusic")
                 if (preventLoudMusic) {
-//                    initAudioManager()
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         val audioAttributes = AudioAttributes.Builder()
                                 .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
@@ -90,13 +96,6 @@ class MediaPlayerHolder(private val context: Context) : PlayerController {
                 }
             }
         }
-    }
-
-    private fun initAudioManager() {
-//        val audiomgr = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-//        audiomgr.setStreamVolume(AudioManager.MODE_IN_CALL, audiomgr.getStreamMaxVolume(AudioManager.MODE_IN_CALL) / 2, AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE)
-//        audiomgr.mode = AudioManager.MODE_IN_CALL
-//        audiomgr.isSpeakerphoneOn = false
     }
 
     override fun loadMedia(filePath: String, preventLoudMusic: Boolean, activity: WeakReference<Activity?>?): Boolean {
@@ -130,6 +129,7 @@ class MediaPlayerHolder(private val context: Context) : PlayerController {
             Log.d(TAG, "Release media player")
             it.release()
             if (!mIsAudioFocused) releaseAudioFocus()
+            if (mPartialWakeLock.isHeld) releasePartialWakeLock()
             mMediaPlayer = null
         }
     }
@@ -140,6 +140,7 @@ class MediaPlayerHolder(private val context: Context) : PlayerController {
         mMediaPlayer?.let {
             if (!it.isPlaying) {
                 requestAudioFocus()
+                acquirePartialWakeLock()
                 if (mIsAudioFocused) {
                     it.start()
                     mPlaybackListener?.onStateChanged(PlaybackListener.States.PLAYING)
@@ -155,6 +156,8 @@ class MediaPlayerHolder(private val context: Context) : PlayerController {
                 Log.d(TAG, "Pause media player")
                 it.pause()
                 mPlaybackListener?.onStateChanged(PlaybackListener.States.PAUSED)
+                releaseAudioFocus()
+                releasePartialWakeLock()
             }
         }
     }
@@ -270,5 +273,27 @@ class MediaPlayerHolder(private val context: Context) : PlayerController {
         }
 
         mIsAudioFocused = false
+    }
+
+    private fun acquirePartialWakeLock() {
+        with(mPartialWakeLock) {
+            synchronized(this) {
+                if (!isHeld) {
+                    acquire()
+                    Log.d(TAG, "Partial WakeLock acquired")
+                }
+            }
+        }
+    }
+
+    private fun releasePartialWakeLock() {
+        with(mPartialWakeLock) {
+            synchronized(this) {
+                if (isHeld) {
+                    release()
+                    Log.d(TAG, "Partial WakeLock released")
+                }
+            }
+        }
     }
 }
