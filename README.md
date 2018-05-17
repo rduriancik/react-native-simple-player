@@ -116,4 +116,4 @@ import { SimplePlayer } from 'react-native-simple-player';
 
 <!---![loud_dialog](https://user-images.githubusercontent.com/13890361/40172230-066b4ad2-59ce-11e8-9f73-95c3d5334662.png)--->
 
-<img src="https://user-images.githubusercontent.com/13890361/40172230-066b4ad2-59ce-11e8-9f73-95c3d5334662.png" width="360" alt="loud_dialog">
+<img src="https://user-images.githubusercontent.com/13890361/40204882-564c15e8-5a2a-11e8-8ef6-8c3043906f49.png" width="360" alt="loud_dialog">
