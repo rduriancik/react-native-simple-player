@@ -105,7 +105,11 @@ import { SimplePlayer } from 'react-native-simple-player';
 - `sliderThumbColor` - color of the foreground switch grip (default #000)
 - `sliderMaxTrackColor` - the color used for the track to the right of the button (default #000)
 
+[[https://github.com/rduriancik/react-native-simple-player/blob/master/sample_images/simple_player.png|alt=player]]
+
 ##### 'preventLoudMusicAlert' 
 - `title` - text of the title
 - `message` - text of the message
 - `buttonText` - text of the button
+
+[[https://github.com/rduriancik/react-native-simple-player/blob/master/sample_images/loud_dialog.png|alt=loudDialog]]
