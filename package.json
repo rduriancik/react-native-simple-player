@@ -1,6 +1,6 @@
 {
   "name": "react-native-simple-player",
-  "version": "0.2.2",
+  "version": "0.2.4",
   "description": "Simple audio player for React Native",
   "main": "index.js",
   "repository": {
