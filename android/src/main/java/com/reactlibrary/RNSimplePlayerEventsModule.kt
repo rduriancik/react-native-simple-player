@@ -124,10 +124,14 @@ class RNSimplePlayerEventsModule(private val reactContext: ReactApplicationConte
     }
 
     override fun onHostPause() {
-        stopEventsLocal()
+        if (isRegistered) {
+            stopEventsLocal()
+        }
     }
 
     override fun onHostDestroy() {
-        stopEventsLocal()
+        if (isRegistered) {
+            stopEventsLocal()
+        }
     }
 }
