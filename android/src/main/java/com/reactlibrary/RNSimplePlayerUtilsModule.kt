@@ -21,12 +21,12 @@ class RNSimplePlayerUtilsModule(private val reactContext: ReactApplicationContex
         val powerManager = reactContext.getSystemService(Context.POWER_SERVICE) as PowerManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
                 powerManager.isWakeLockLevelSupported(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK)) {
-            powerManager.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, TAG)
+            powerManager.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, TAG).apply { setReferenceCounted(false) }
         } else {
             null
         }
     }
-    private var lastWindowParams: WindowManager.LayoutParams? = null
+    private var lastWindowBrigthness: Float = -1f
 
     override fun getName() = "RNSimplePlayerUtils"
 
@@ -117,7 +117,7 @@ class RNSimplePlayerUtilsModule(private val reactContext: ReactApplicationContex
                 Log.d(TAG, "manually turn the screen off")
                 val window = it.window
                 val params = window.attributes
-                lastWindowParams = params
+                lastWindowBrigthness = params.screenBrightness
                 params.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_OFF
                 window.attributes = params
                 window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -130,13 +130,9 @@ class RNSimplePlayerUtilsModule(private val reactContext: ReactApplicationContex
             currentActivity?.let {
                 Log.d(TAG, "manually turn the screen off")
                 val window = it.window
-                window.attributes = if (lastWindowParams != null) {
-                    lastWindowParams
-                } else {
-                    val params = window.attributes
-                    params.screenBrightness = -1f
-                    params
-                }
+                val params = window.attributes
+                params.screenBrightness = lastWindowBrigthness
+                window.attributes = params
                 window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             }
         }

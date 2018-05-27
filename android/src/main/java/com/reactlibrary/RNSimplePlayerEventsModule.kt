@@ -13,7 +13,7 @@ import com.facebook.react.bridge.*
 import com.facebook.react.modules.core.DeviceEventManagerModule
 
 class RNSimplePlayerEventsModule(private val reactContext: ReactApplicationContext)
-    : ReactContextBaseJavaModule(reactContext) {
+    : ReactContextBaseJavaModule(reactContext), LifecycleEventListener {
 
     companion object {
         private const val ON_HEADSET_PLUGGED = "ON_HEADSET_PLUGGED"
@@ -26,6 +26,7 @@ class RNSimplePlayerEventsModule(private val reactContext: ReactApplicationConte
         private const val TAG = "RNSimplePlayerEvents"
     }
 
+    private var isRegistered = false
     private var isHeadsetPluggedIn = false
     private var isNearEar = false
     private val sensorManager = reactContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -57,14 +58,28 @@ class RNSimplePlayerEventsModule(private val reactContext: ReactApplicationConte
         }
     }
 
+    init {
+        reactContext.addLifecycleEventListener(this)
+    }
+
     @ReactMethod
     fun startEvents() {
+        isRegistered = true
+        startEventsLocal()
+    }
+
+    fun startEventsLocal() {
         reactContext.registerReceiver(onHeadsetPlugged, IntentFilter(Intent.ACTION_HEADSET_PLUG))
         sensorManager.registerListener(sensorEventListener, proximitySensor, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
     @ReactMethod
     fun stopEvents() {
+        isRegistered = false
+        stopEventsLocal()
+    }
+
+    fun stopEventsLocal() {
         reactContext.unregisterReceiver(onHeadsetPlugged)
         sensorManager.unregisterListener(sensorEventListener)
     }
@@ -100,5 +115,19 @@ class RNSimplePlayerEventsModule(private val reactContext: ReactApplicationConte
                 IS_NEAR_EAR to true,
                 IS_NOT_NEAR_EAR to false
         )
+    }
+
+    override fun onHostResume() {
+        if (isRegistered) {
+            startEventsLocal()
+        }
+    }
+
+    override fun onHostPause() {
+        stopEventsLocal()
+    }
+
+    override fun onHostDestroy() {
+        stopEventsLocal()
     }
 }
