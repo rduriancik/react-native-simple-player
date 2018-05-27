@@ -24,8 +24,7 @@
   "homepage": "https://github.com/rduriancik/react-native-simple-player#readme",
   "peerDependencies": {
     "react-native": "^0.55.4",
-    "react": "^16.3.2",
-    "react-native-vector-icons": "^4.6.0"
+    "react": "^16.3.2"
   },
   "dependencies": {
     "prop-types": "^15.6.1"
